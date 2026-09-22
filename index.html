@@ -7,34 +7,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 <meta name="apple-mobile-web-app-title" content="LotQuote" />
 <meta name="robots" content="noindex" />
-<title>LotQuote Sales CRM — test</title>
+<title>LotQuote Sales CRM</title>
 <link rel="stylesheet" href="app.css" />
-<body>
+<body style="background:#000;margin:0">
 <div id="root"></div>
-<div id="dev" class="fixed top-1 left-1/2 -translate-x-1/2 z-50 text-center" style="font:500 11px ui-sans-serif,system-ui,sans-serif">
-  <button id="devToggle" class="px-1.5 py-0.5 rounded bg-zinc-900/80 border border-zinc-800 text-zinc-600 text-[9px]">TEST</button>
-  <div id="devPanel" class="hidden mt-1 p-2 rounded-lg bg-zinc-900 border border-zinc-700 space-y-1 w-44 text-left">
-    <button data-act="seed" class="w-full px-2 py-1.5 rounded bg-green-500 text-black font-bold">Load sample data</button>
-    <button data-act="reset" class="w-full px-2 py-1.5 rounded bg-zinc-800 text-zinc-300 border border-zinc-700">Reset to empty</button>
-    <button data-act="dump" class="w-full px-2 py-1.5 rounded bg-zinc-800 text-zinc-300 border border-zinc-700">Export data (JSON)</button>
-    <p class="text-[10px] text-zinc-500 leading-snug pt-0.5">Test copy. Data stays on this phone only. Don't enter real customer info.</p>
-  </div>
-</div>
 <script src="app.js"></script>
-<script>
-  const panel = document.getElementById("devPanel");
-  document.getElementById("devToggle").onclick = () => panel.classList.toggle("hidden");
-  panel.addEventListener("click", async (e) => {
-    const act = e.target.dataset.act;
-    if (act === "seed") { await __lq.seed(); location.reload(); }
-    if (act === "reset" && confirm("Erase all test data on this phone?")) { await __lq.reset(); location.reload(); }
-    if (act === "dump") {
-      const r = await __lq.dump();
-      const a = document.createElement("a");
-      a.href = URL.createObjectURL(new Blob([r ? r.value : "{}"], { type: "application/json" }));
-      a.download = "lotquote-test-data.json"; a.click();
-    }
-  });
-</script>
 </body>
 </html>
