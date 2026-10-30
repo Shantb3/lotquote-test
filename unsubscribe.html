@@ -1,0 +1,77 @@
+<!doctype html>
+<!-- LotQuote: unsubscribe from campaign emails (update 066). The link at the
+     foot of every campaign email lands here: no login, one button. The code
+     and its signature (t, s) go to the campaigns Edge Function, which checks
+     the signature and puts the address on the never-again list for good.
+     A mail app's own Unsubscribe button posts to the function directly
+     (List-Unsubscribe-Post) and never needs this page. Static: copied to the
+     site as it is, nothing to build. -->
+<html lang="en">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="robots" content="noindex" />
+<title>Unsubscribe · LotQuote</title>
+<style>
+  :root { color-scheme: light; }
+  * { box-sizing: border-box; }
+  body { margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px 16px;
+    font: 15px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; color: #1f2328; background: #f6f7f8; }
+  main { width: 100%; max-width: 420px; background: #fff; border: 1px solid #e5e7eb; border-radius: 16px; padding: 28px 24px; box-shadow: 0 1px 2px rgba(0,0,0,.04); }
+  h1 { font-size: 20px; line-height: 1.3; margin: 0 0 8px; }
+  p { margin: 0 0 16px; color: #4b5563; overflow-wrap: anywhere; }
+  .brand { font-weight: 600; color: #3FC085; letter-spacing: .2px; margin-bottom: 18px; font-size: 14px; }
+  button { appearance: none; border: 0; border-radius: 10px; background: #3FC085; color: #062b1a; font: inherit; font-weight: 600; padding: 11px 16px; width: 100%; cursor: pointer; }
+  button[disabled] { opacity: .6; cursor: default; }
+  .small { font-size: 13px; color: #6b7280; margin: 14px 0 0; }
+  .err { color: #b42318; }
+  [hidden] { display: none !important; }
+</style>
+<body>
+<main aria-live="polite">
+  <div class="brand">LotQuote</div>
+  <section id="ask">
+    <h1>Unsubscribe from LotQuote emails?</h1>
+    <p>You won't get our campaign emails again. A reply to something you asked us about still reaches you.</p>
+    <button id="go" type="button">Unsubscribe</button>
+    <p class="small err" id="neterr" hidden>We couldn't reach our server. Check your connection and try again.</p>
+    <p class="small">Changed your mind? Just close this page.</p>
+  </section>
+  <section id="done" hidden>
+    <h1>You're unsubscribed</h1>
+    <p id="who">You won't get LotQuote's campaign emails again.</p>
+    <p class="small">If this was a mistake, reply to any of our emails and we'll put it right.</p>
+  </section>
+  <section id="bad" hidden>
+    <h1>This link didn't work</h1>
+    <p class="err" id="why">It may have been cut short when it was copied. Try the Unsubscribe link in the email again, or reply to the email and we'll take you off by hand.</p>
+  </section>
+</main>
+<script>
+  (function () {
+    var FN = "https://ialxmggcvshvzmbphhdb.supabase.co/functions/v1/campaigns?unsubscribe=1";
+    var q = new URLSearchParams(location.search);
+    var t = q.get("t") || "", s = q.get("s") || "", test = q.get("test") === "1";
+    var $ = function (id) { return document.getElementById(id); };
+    var show = function (id) { ["ask", "done", "bad"].forEach(function (x) { $(x).hidden = x !== id; }); };
+    if (!test && (!/^cm[0-9a-f]{32}$/.test(t) || !s)) return show("bad");
+    $("go").addEventListener("click", function () {
+      if (test) { $("who").textContent = "This was a test email, so nothing changed."; return show("done"); }
+      $("go").disabled = true;
+      $("go").textContent = "One moment…";
+      fetch(FN, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ t: t, s: s }) })
+        .then(function (r) { return r.json().catch(function () { return {}; }).then(function (b) { return { ok: r.ok && b && b.ok, b: b || {} }; }); })
+        .then(function (r) {
+          if (!r.ok) return show("bad");
+          if (r.b.email) $("who").textContent = r.b.email + " won't get LotQuote's campaign emails again.";
+          show("done");
+        })
+        .catch(function () {
+          $("go").disabled = false;
+          $("go").textContent = "Try again";
+          $("neterr").hidden = false;
+        });
+    });
+  })();
+</script>
+</body>
+</html>
